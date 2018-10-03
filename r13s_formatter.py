@@ -50,19 +50,38 @@ def validate(r13s, config_file = R13S_CONFIG_JSON):
         data_item_type = data_item[DATA_ITEM_TYPE]
         __validate(data_item, formats[data_item_type])
 
-def format_recommendation(item, associated_items=[], json_sample_dict={}, 
+def __make_json_from_id(id, json_sample, withRecommendations=False):
+    json = copy.deepcopy(json_sample)
+    if not withRecommendations:
+        json.pop(RECOMMENDATIONS, None)
+    return json
+
+# ----------------------------------------------------------------------------
+# Public methods
+# ----------------------------------------------------------------------------
+def make_json_series(id, json_sample, withRecommendations=False):
+    jseries = __make_json_from_id(id, json_sample, withRecommendations)
+    jseries["series_id"] = id
+    return jseries
+
+def make_json_movie(id, json_sample, withRecommendations=False):
+    jmovie = __make_json_from_id(id, json_sample, withRecommendations)
+    jmovie["video_id"] = id
+    return jmovie
+
+def make_a_recommendation0(jitem, associated_jitems=[], json_sample_dict={}, 
                         config_file = R13S_CONFIG_JSON):
-    "Format a recommendation consisting of an item and its associated items"
+    "Format a recommendation consisting of an (json) item and its associated (json) items"
     # load conifgurations if not provided 
     if len(json_sample_dict) == 0:
         json_sample_dict = __load_sample_r13s_formats(config_file)
 
-    formatted_item = __format_item(item, json_sample_dict)
+    recommendation = __format_item(jitem, json_sample_dict)
     # associated_items
-    if (len(associated_items) != 0):
-        formatted_item[RECOMMENDATIONS] = [__format_item(i, json_sample_dict) 
-                                        for i in associated_items]
-    return formatted_item
+    if (len(associated_jitems) != 0):
+        recommendation[RECOMMENDATIONS] = [__format_item(i, json_sample_dict) 
+                                        for i in associated_jitems]
+    return recommendation
 
 def format_r13s(config_file = R13S_CONFIG_JSON):
     "Format recommendations"
@@ -77,7 +96,7 @@ def main():
         item = {"type": "movie", "id" : str(video_id)}
         associated_items = [  {"type": "movie", "id" : str(other_video_id)} 
                              for other_video_id in range (0, video_id) ]
-        data.append(format_recommendation(item, associated_items))
+        data.append(make_a_recommendation0(item, associated_items))
     validate(r13s)
     pprint.pprint(r13s)    
 
