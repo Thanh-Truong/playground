@@ -46,31 +46,29 @@ def validate(r13s, config_file = R13S_CONFIG_JSON):
         data_item_type = data_item[DATA_ITEM_TYPE]
         __validate(data_item, formats[data_item_type])
 
-def __make_json_from_id(id, json_sample, withRecommendations=False):
-    json = __clone__(json_sample)
-    if not withRecommendations and isinstance(json, dict):
-       json.pop(RECOMMENDATIONS, None)
-    return json
+def __make_obj_from_id(id, json_sample, withRecommendations=False):
+    obj = __clone__(json_sample)
+    if not withRecommendations and __is_dict(obj):
+       obj.pop(RECOMMENDATIONS, None)
+    if __is_str(obj):
+        obj = id
+    return obj
 
 
 # ----------------------------------------------------------------------------
 # Public methods
 # ----------------------------------------------------------------------------
-def make_json_series(id, r13s_configs, withRecommendations=False):
-    jseries = __make_json_from_id(id, r13s_configs[SERIES], withRecommendations)
-    if __is_dict(jseries):
-        jseries["series_id"] = id
-    elif __is_str(jseries):
-        jseries = id
-    return jseries
+def make_series(id, r13s_configs, withRecommendations=False):
+    series = __make_obj_from_id(id, r13s_configs[SERIES], withRecommendations)
+    if __is_dict(series):
+        series["series_id"] = id
+    return series
 
-def make_json_movie(id, r13s_configs, withRecommendations=False):
-    jmovie = __make_json_from_id(id, r13s_configs[MOVIE], withRecommendations)
-    if __is_dict(jmovie):
-        jmovie["video_id"] = id
-    elif __is_str(jmovie):
-        jmovie = id
-    return jmovie
+def make_movie(id, r13s_configs, withRecommendations=False):
+    movie = __make_obj_from_id(id, r13s_configs[MOVIE], withRecommendations)
+    if __is_dict(movie):
+        movie["video_id"] = id
+    return movie
 
 def make_r13s(r13s_configs):
     return __clone__(r13s_configs[R13S_FORMAT])
@@ -94,8 +92,8 @@ def test(config_file):
     r13s[DATA_ITEM_DATA] = data
 
     for video_id in range(1, 5):
-        item = make_json_movie(str(video_id), r13s_configs, True)
-        associated_items = [  make_json_movie(str(other_video_id), r13s_configs)
+        item = make_movie(str(video_id), r13s_configs, True)
+        associated_items = [  make_movie(str(other_video_id), r13s_configs)
                              for other_video_id in range (0, video_id) ]
         add_r13s_data_item(data, item, associated_items)
     #validate(r13s)
