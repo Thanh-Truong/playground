@@ -65,15 +65,20 @@ def make_r13s_data(r13s_configs):
     return __clone__(r13s_configs['r13s_format']['data'])
 
 def add_r13s_data_item(data, item, associated_items):
-    item[RECOMMENDATIONS] = [a_item for a_item in associated_items]
-    data.append(item)
-
+    if isinstance(item, dict):
+        item[RECOMMENDATIONS] = [a_item for a_item in associated_items]
+    
+    if isinstance(data, list):
+        data.append(item)
+    elif isinstance(data, dict):
+        data[item] = [a_item for a_item in associated_items]
+        
 def main():
     r13s_configs = __load_sample_r13s_formats(R13S_CONFIG_JSON)
     r13s = make_r13s(r13s_configs)
     data = make_r13s_data(r13s_configs)
     r13s[DATA_ITEM_DATA] = data
-    
+
     for video_id in range(1, 5):
         item = make_json_movie(str(video_id), r13s_configs, True)
         associated_items = [  make_json_movie(str(other_video_id), r13s_configs)
