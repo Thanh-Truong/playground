@@ -6,8 +6,8 @@ DATA_ITEM_TYPE = 'type'
 DATA_ITEM_DATA = 'data'
 MOVIE = 'movie'
 SERIES = 'series'
-R13S_CONFIG_JSON = 'r13s_config.json'
-R13S_CONFIG1_JSON = 'r13s_config1.json'
+R13S_CONFIG0_JSON =  'r13s_v1.json'
+R13S_CONFIG1_JSON = 'r13s_v2.json'
 RECOMMENDATIONS = 'recommendations'
 R13S_FORMAT = 'r13s_format'
 SERIES_ID = 'series_id'
@@ -22,27 +22,29 @@ def __is_dict(o):
 def __is_str(o):
     return isinstance(o, str) or isinstance(o, unicode)
 
+def __is_same_type(a, b):
+    return (type(a) is type(b)) or (__is_str(a) and __is_str(b))
+
 def __validate(json, json_sample):
     for key, value in json_sample.items():
-        acutal_value = json[key]
-        assert((type(acutal_value) is type(value)) 
-                or (type(acutal_value).__name__ == 'unicode' 
-                    and  type(value).__name__ == 'str')
-                or (type(acutal_value).__name__ == 'str' 
-                    and  type(value).__name__ == 'unicode')) 
+        actual_value = json[key]   
+        assert(__is_same_type(actual_value, value))
+        if (__is_dict(actual_value) and __is_dict(value)):
+            __validate(actual_value, value)
 
-def load_sample_r13s_formats(r13s_filename=R13S_CONFIG_JSON):
+def load_sample_r13s_formats(r13s_filename=R13S_CONFIG0_JSON):
     with open(r13s_filename, "r") as f:
         return json.load(f)
 
-def validate(r13s, config_file = R13S_CONFIG_JSON):
+def validate(r13s, config_file = R13S_CONFIG0_JSON):
     "Validate a JSON (recommendations, r13s) accordingly to a configuration"
     formats = load_sample_r13s_formats(config_file)
     # validate all top-level fields
     __validate(r13s, formats[R13S_FORMAT])
-
+    
     # validate all items in data field
     for data_item in r13s[DATA_ITEM_DATA]:
+        print(data_item)
         assert(DATA_ITEM_TYPE in data_item)
         data_item_type = data_item[DATA_ITEM_TYPE]
         __validate(data_item, formats[data_item_type])
@@ -60,16 +62,20 @@ def __make_obj_from_id(id, json_sample, withRecommendations=False):
 # Public methods
 # ----------------------------------------------------------------------------
 def make_series(id, r13s_configs, withRecommendations=False):
-    series = __make_obj_from_id(id, r13s_configs[SERIES], withRecommendations)
-    if __is_dict(series):
-        series[SERIES_ID] = id
-    return series
+    if SERIES in r13s_configs and r13s_configs[SERIES]:
+        series = __make_obj_from_id(id, r13s_configs[SERIES], withRecommendations)
+        if __is_dict(series):
+            series[SERIES_ID] = id
+        return series
+    return None
 
 def make_movie(id, r13s_configs, withRecommendations=False):
-    movie = __make_obj_from_id(id, r13s_configs[MOVIE], withRecommendations)
-    if __is_dict(movie):
-        movie[MOVIE_ID] = id
-    return movie
+    if MOVIE in r13s_configs and r13s_configs[MOVIE]:
+        movie = __make_obj_from_id(id, r13s_configs[MOVIE], withRecommendations)
+        if __is_dict(movie):
+            movie[MOVIE_ID] = id
+        return movie
+    return None
 
 def make_r13s(r13s_configs):
     return __clone__(r13s_configs[R13S_FORMAT])
@@ -97,12 +103,13 @@ def test(config_file):
         associated_items = [  make_movie(str(other_video_id), r13s_configs)
                              for other_video_id in range (0, video_id) ]
         add_r13s_data_item(data, item, associated_items)
+    pprint.pprint(r13s)
     #validate(r13s)
-    pprint.pprint(r13s)   
+    
 
 def main():
-    test(R13S_CONFIG_JSON)
-    test(R13S_CONFIG1_JSON)     
+    test(R13S_CONFIG0_JSON)
+    #test(R13S_CONFIG1_JSON)     
 
 if __name__ == '__main__':
   main()
