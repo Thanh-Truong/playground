@@ -29,10 +29,10 @@ def merge_sort(array):
     return  array
 
 def main():
-    print(merge_sort([3, 4, 7, 1, 0, 90, 4]))
-    print(merge_sort([3]))
-    print(merge_sort([3,2]))
-    print(merge_sort([]))
+    assert merge_sort([3, 4, 7, 1, 0, 90, 4]) == [0, 1, 3, 4, 4, 7, 90]
+    assert merge_sort([3]) == [3]
+    assert merge_sort([3,2]) == [2,3]
+    assert merge_sort([]) == []
     
 if __name__ == "__main__":
     main()
