@@ -1,17 +1,7 @@
 # Given an image represented by an NxN matrix, where each pixel in the image is 4 bytes,
 #  write a method to rotate the image by 90 degrees Can you do this in place?
 import random
-
-def make_array(n, m, default_value=None):
-    return [
-        # random
-        [default_value if default_value else random.randint(0, 100) 
-        for j in range(m)]
-        for i in range(n)]
-
-def print_array(array):
-    for subarray in array:
-        print(subarray)
+from array_utils import print_array, make_array
 
 def rotate(array):
     n = len(array)
