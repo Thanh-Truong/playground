@@ -1,5 +1,7 @@
-from merge_sort import merge_sort
 #Write a method to decide if two strings are anagrams or not
+#
+
+from merge_sort import merge_sort
 # Solution 1. return sort(stra) == sort(strb)
 def is_anagrams_0(stra, strb):
     # this merge_sort implementation works only with array
@@ -24,15 +26,40 @@ def is_anagrams_1(stra, strb):
     d_stra = count_occurences(stra)
     d_strb = count_occurences(strb)
     return d_stra == d_strb
+
+# Solution 3. Expensive !!!
+# - Do not use extra datastructure
+# - Do not sort
+def count_character(c, array):
+    count = 0
+    for i in range(len(array)):
+        if (array[i] == c):
+            count += 1
+    return count
+
+def is_anagrams_2(stra, strb):
+    if len(stra) == len(stra):
+        for c in stra:
+            count_c_in_stra = count_character(c, stra)
+            count_c_in_strb = count_character(c, strb)
+            if count_c_in_stra != count_c_in_strb:
+                return False
+        return True
+    return False
     
 
 def main():
     assert is_anagrams_0("AB", "BA") == True
     assert is_anagrams_0("ABC", "BCA") == True
     assert is_anagrams_0("ABC", "BCD") == False
+    
     assert is_anagrams_1("AB", "BA") == True
     assert is_anagrams_1("ABC", "BCA") == True
     assert is_anagrams_1("ABC", "BCD") == False
+
+    assert is_anagrams_2("AB", "BA") == True
+    assert is_anagrams_2("ABC", "BCA") == True
+    assert is_anagrams_2("ABC", "BCD") == False
 
 if __name__ == "__main__":
     main()
